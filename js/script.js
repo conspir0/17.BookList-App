@@ -41,7 +41,19 @@ class UI {
         `;
         
         list.appendChild(row);
-    } 
+    }
+    
+    static deleteBook(el) {
+        if(el.classList.contains('delete')) {
+            el.parentElement.parentElement.remove();
+        }
+    }
+    
+    static clearFields() {
+        document.querySelector('#title').value = '';
+        document.querySelector('#author').value = '';
+        document.querySelector('#isbn').value = '';
+    }
 }
 
 // Store Class: hadles storage
@@ -50,5 +62,27 @@ class UI {
 document.addEventListener('DOMContentLoaded', UI.displayBooks);
 
 // Events: add a book
+document.querySelector('#book-form').addEventListener('submit', (e) => {
+    
+    // Prevent actual sumbit
+    e.preventDefault();
+    
+    // Get form values
+    const title = document.querySelector('#title').value;
+    const author = document.querySelector('#author').value;
+    const isbn = document.querySelector('#isbn').value;
+    
+    // Instatiate book
+    const book = new Book(title, author, isbn);
+
+    // Add bookt to UI
+    UI.addBookToList(book);
+
+    // Clear fileds
+    UI.clearFields();
+});
 
 // Event: remove a book
+document.querySelector('#book-list').addEventListener('click', (e) => {
+    UI.deleteBook(e.target);
+})
