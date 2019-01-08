@@ -10,27 +10,26 @@ class Book {
 // UI Class: handle UI tasks
 class UI {
     static displayBooks() {
-        const StoredBooks = [
-            {
-                title: 'Peter Pan',
-                author: ' Barrie James Matthew',
-                isbn: '123456'
-            },
-            {
-                title: 'Alice in Wonderland',
-                author: 'Carroll Lewis',
-                isbn: '901221'
-            }
-        ];
+//        const StoredBooks = [
+//            {
+//                title: 'Peter Pan',
+//                author: ' Barrie James Matthew',
+//                isbn: '123456'
+//            },
+//            {
+//                title: 'Alice in Wonderland',
+//                author: 'Carroll Lewis',
+//                isbn: '901221'
+//            }
+//        ];
         
-        const books = StoredBooks;
+        const books = /*StoredBooks*/ Store.getBooks();
         
         books.forEach((book)=> UI.addBookToList(book));
     }
     
     static addBookToList(book) {
         const list = document.querySelector('#book-list');
-        
         const row = document.createElement('tr');
         
         row.innerHTML = `
@@ -69,6 +68,34 @@ class UI {
 }
 
 // Store Class: hadles storage
+class Store {
+    static getBooks() {
+        let books;
+        if(localStorage.getItem('books') === null) {
+           books = [];
+        } else {
+           books = JSON.parse(localStorage.getItem('books'));
+        }
+        return books;
+    }
+    
+    static addBook(book) {
+        const books = Store.getBooks();
+        books.push(book);
+        localStorage.setItem('books', JSON.stringify(books));
+    }
+    
+    static removeBook(isbn) {
+        const books = Store.getBooks();
+        books.forEach((book, index) => {
+            if(book.isbn === isbn) {
+               books.splice(index, 1);
+            }
+        });
+        
+        localStorage.setItem('books', JSON.stringify(books));
+    }
+}
 
 // Events: display books
 document.addEventListener('DOMContentLoaded', UI.displayBooks);
@@ -91,8 +118,11 @@ document.querySelector('#book-form').addEventListener('submit', (e) => {
         // Instatiate book
         const book = new Book(title, author, isbn);
 
-        // Add bookt to UI
+        // Add book to UI
         UI.addBookToList(book);
+           
+        // Add book to store
+        Store.addBook(book);
            
         // Show success message
         UI.showAlert('Book added', 'success');
@@ -104,7 +134,11 @@ document.querySelector('#book-form').addEventListener('submit', (e) => {
 
 // Event: remove a book
 document.querySelector('#book-list').addEventListener('click', (e) => {
+    // Remove book from UI
     UI.deleteBook(e.target);
+    
+    // Remove book from store
+    Store.removeBook(e.target.parentElement.previousElementSibling.textContent);
     
     // Show success message
     UI.showAlert('Book removed', 'success');       
